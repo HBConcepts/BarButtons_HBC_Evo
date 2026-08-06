@@ -1,17 +1,20 @@
 /*
-   BarButtons firmware v1
+  BarButtons_HBC_Evo firmware v1
 
-   This arduino code maps physical buttons from a keypad to bluetooth keyboard commands
-   Intended to make using your phone for navigation on a motorcycle easier
-   More info at https://jaxeadv.com/barbuttons
-   
-   Build instructions at https://jaxeadv.com/barbuttons/build
-   
-   Ensure to set DEBUG to 0 in the code below, unless you're connecting the ESP32C3 to the serial monitor
+  This is an evolution of the JaxeADV orignal barbuttons to replace the buttons used for 
+  directions by a 5-way digital thumb stick.
 
-   This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. 
-   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to 
-   Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+  This arduino code maps physical buttons from a keypad to bluetooth keyboard commands
+  Intended to make using your phone for navigation on a motorcycle easier
+  
+  More info at https://jaxeadv.com/barbuttons
+  Build instructions at https://jaxeadv.com/barbuttons/build
+
+  Ensure to set DEBUG to 0 in the code below, unless you're connecting the ESP32C3 to the serial monitor
+
+  This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. 
+  To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to 
+  Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 
 */
@@ -42,7 +45,7 @@ byte colPins[ROWS] = {3, 4, 5};  // keypad pins, left to right
 
 
 // Initial set-up the bleKeyboard instance
-BleKeyboard bleKeyboard("BarButtons", "JaxeADV", 100);
+BleKeyboard bleKeyboard("BarButtonsHBC", "HBConcepts", 100);
 
 
 // For OTA updates
@@ -50,7 +53,7 @@ BleKeyboard bleKeyboard("BarButtons", "JaxeADV", 100);
 #include <Update.h>
 const char* SSID = "barbuttons";
 const char* PSWD = "barbuttons";
-String host = "jaxeadv.com";
+String host = "updates.hbconcepts.net";
 int port = 80;
 String ota_bin_stable =  "/barbuttons-files/barbuttons-stable.bin";  // bin file name with a slash in front.
 String ota_bin_preview = "/barbuttons-files/barbuttons-preview.bin"; // bin file name with a slash in front.
