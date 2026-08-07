@@ -1,5 +1,5 @@
 /*
-  BarButtons_HBC_Evo firmware v1
+  BarButtons_HBC_Evo
 
   This is an evolution of the JaxeADV orignal barbuttons to replace the buttons used for 
   directions by a 5-way digital thumb stick.
