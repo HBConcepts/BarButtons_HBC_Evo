@@ -33,9 +33,9 @@ const int firmware_version = 1;
 const byte ROWS = 3;
 const byte COLS = 3;
 char keys[ROWS][COLS] = {
-  {'1', '5', '4'},
-  {'2', '6', '7'},
-  {'3', '8', '9'}
+  {'+', 'U', 'C'},
+  {'-', 'L', 'R'},
+  {'3', 'D', '9'}
 };
 
 // Pin assignment, is fixed because of instructions and PCB
@@ -70,7 +70,7 @@ int last_keypad_state = IDLE; // Used to distinguish between button release from
 unsigned long hold_time = millis();
 
 // define time for a long press (ms)
-const int long_press_time = 500; // was: 440
+const int long_press_time = 750;
 const int long_press_repeat_interval = 100;
 const int long_press_time_config = 4500; // Long press of 4,5 seconds, plus the 0,5 of the long_press_time = 5 seconds delay on the config mode button
 
@@ -85,7 +85,7 @@ int led_state_time = 0;  // holds the time we've switched to the current led_sta
 // Other keys will be sent delayed on "key up"
 // This is to be used for repeating keys or keys that are only pressed.
 // First dimension is keymap, second is key
-char instant_keys[10] = {'1', '2', '5', '6', '7', '8'};
+char instant_keys[10] = {'+', '-', 'U', 'L', 'R', 'D'};
 
 // Routine to send the keystrokes on a short press of the keypad
 void send_short_press(KeypadEvent key) {
@@ -98,14 +98,14 @@ void send_short_press(KeypadEvent key) {
   if (DEBUG) { Serial.println("We're in the main menu, switching key");  Serial.println(key); }
   
   switch (key) {
-    case '1': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
-    case '2': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
-    case '3': bleKeyboard.write('n');                          flash_led(1, 150, 0); break;
-    case '4': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
-    case '5': bleKeyboard.tap(KEY_UP);                 flash_led(1, 150, 0); break;
-    case '6': bleKeyboard.tap(KEY_LEFT);               flash_led(1, 150, 0); break;
-    case '7': bleKeyboard.tap(KEY_RIGHT);              flash_led(1, 150, 0); break;
-    case '8': bleKeyboard.tap(KEY_DOWN);               flash_led(1, 150, 0); break;
+    case '+': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
+    case '-': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
+    case '3': bleKeyboard.write('a');                          flash_led(1, 150, 0); break;
+    //case 'C': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
+    case 'U': bleKeyboard.tap(KEY_UP);                 flash_led(1, 150, 0); break;
+    case 'L': bleKeyboard.tap(KEY_LEFT);               flash_led(1, 150, 0); break;
+    case 'R': bleKeyboard.tap(KEY_RIGHT);              flash_led(1, 150, 0); break;
+    case 'D': bleKeyboard.tap(KEY_DOWN);               flash_led(1, 150, 0); break;
   }
 }
 
@@ -118,14 +118,14 @@ void send_long_press(KeypadEvent key) {
   }
 
   switch (key) {
-    case '1': send_repeating_key('+'); break;
-    case '2': send_repeating_key('-'); break;
-    case '3': bleKeyboard.write('d'); flash_led(1, 150, 0); break;
-    case '4': if(wait_for_key_hold(long_press_time_config)) { update_barbuttons_firmware(ota_bin_stable); } break;
-    case '5': send_repeating_key(KEY_UP); break;
-    case '6': send_repeating_key(KEY_LEFT); break;
-    case '7': send_repeating_key(KEY_RIGHT); break;
-    case '8': send_repeating_key(KEY_DOWN); break;
+    case '+': send_repeating_key('+'); break;
+    case '-': send_repeating_key('-'); break;
+    case '3': bleKeyboard.write('b'); flash_led(1, 150, 0); break;
+    case 'C': bleKeyboard.write('c'); flash_led(1, 150, 0); break;
+    case 'U': send_repeating_key(KEY_UP); break;
+    case 'L': send_repeating_key(KEY_LEFT); break;
+    case 'R': send_repeating_key(KEY_RIGHT); break;
+    case 'D': send_repeating_key(KEY_DOWN); break;
   }
 }
 
@@ -270,6 +270,7 @@ void setup() {
   // End of setup()
   if (DEBUG) {
     Serial.println("Good to go!");
+    Serial.println("Firmware version: " + String(firmware_version));
   }
 }
 
