@@ -17,8 +17,11 @@ You can find 3D printable models for an updated layout at https://cults3d.com/en
     - Long Press: Switch Map Orientation (3D / 2D / NorthUp)
 
 # Connection
+
+```markdown
 IO PIN  2   3   4   5   6
     1   U   D   L   R   C
     0   +   -   A
 
 LED: IO PIN 7
+```

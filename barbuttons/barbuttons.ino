@@ -20,15 +20,15 @@
 */
 
 // Debugging flag. Mostly controls if serial output is enabled.
-// On the C3, the serial output blocks the device unless the serial monitor is attached (!)
 const int DEBUG = 1;
 
 // Firmware version
-const int firmware_version = 1;
+const int firmware_version = 2;
 
 #include <Keypad.h>      // Keypad library to handle matrix keypad setup
 #include <HijelHID_BLEKeyboard.h>
 
+/*
 // Keypad library settings
 const byte ROWS = 3;
 const byte COLS = 3;
@@ -37,11 +37,21 @@ char keys[ROWS][COLS] = {
   {'-', 'L', 'R'},
   {'A', 'D', '9'}
 };
+*/
+
+// Keypad library settings
+const byte ROWS = 2;
+const byte COLS = 5;
+char keys[ROWS][COLS] = {  
+  {'+', '-', 'A', '9', '9'},
+  {'U', 'D', 'L', 'R', 'C'}
+};
+
 
 // Pin assignment, is fixed because of instructions and PCB
-const int LED_PIN = 6;    //   status led 
-byte rowPins[COLS] = {2, 1, 0};  // keypad pins, top to bottom
-byte colPins[ROWS] = {3, 4, 5};  // keypad pins, left to right
+const int LED_PIN = 7;    //   status led 
+byte rowPins[ROWS] = {0, 1};  // keypad pins, top to bottom
+byte colPins[COLS] = {2, 3, 4, 5, 6};  // keypad pins, left to right
 
 
 // Initial set-up the bleKeyboard instance
@@ -70,7 +80,7 @@ int last_keypad_state = IDLE; // Used to distinguish between button release from
 unsigned long hold_time = millis();
 
 // define time for a long press (ms)
-const int long_press_time = 750;
+const int long_press_time = 500;
 const int long_press_repeat_interval = 100;
 const int long_press_time_config = 4500; // Long press of 4,5 seconds, plus the 0,5 of the long_press_time = 5 seconds delay on the config mode button
 
