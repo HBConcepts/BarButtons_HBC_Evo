@@ -74,19 +74,12 @@ const int long_press_time = 500; // was: 440
 const int long_press_repeat_interval = 100;
 const int long_press_time_config = 4500; // Long press of 4,5 seconds, plus the 0,5 of the long_press_time = 5 seconds delay on the config mode button
 
-int app_status = 0;       // holds the current status
-int led_delays[4][2] = {  // holds the on/off pattern/times for the different status'es
-  { 500,  500  },  // 0: Not connected to BT
-  { 100,  3000 },  // 1: Connected (config menu)
-  { 3000, 100  },  // 2: Connected (main menu led off)
-  { 3000, 100  }   // 3: Connected (main menu led keymap flash)
-};
+int led_delays[2] = { 500,  500  }; // holds the on/off pattern/times 
 int keymap_indicator_led_delays[2] = { 100, 50 };  // How long should flash the led on and off for keymap indicator?
 int keymap_indicator_countdown = 0;  // keeps track of the countdown for the keymap flashes
 
 int led_state = 0;       // holds the state of the led (0=LOW, 1=HIGH)
 int led_state_time = 0;  // holds the time we've switched to the current led_state
-
 
 // These keys will be sent instantly on initial press of the button at "key down"
 // Other keys will be sent delayed on "key up"
@@ -102,21 +95,18 @@ void send_short_press(KeypadEvent key) {
     Serial.println(key);
   }
 
-  // We're in the main menu
-  if (app_status == 2 || app_status == 3 || app_status == 0) {
-    if (DEBUG) { Serial.println("We're in the main menu, switching key");  Serial.println(key); }
-    
-    switch (key) {
-      case '1': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
-      case '2': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
-      case '3': bleKeyboard.write('n');                          flash_led(1, 150, 0); break;
-      case '4': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
-      case '5': bleKeyboard.write(KEY_UP);                 flash_led(1, 150, 0); break;
-      case '6': bleKeyboard.write(KEY_LEFT);               flash_led(1, 150, 0); break;
-      case '7': bleKeyboard.write(KEY_RIGHT);              flash_led(1, 150, 0); break;
-      case '8': bleKeyboard.write(KEY_DOWN);               flash_led(1, 150, 0); break;
-    }
-  }      
+  if (DEBUG) { Serial.println("We're in the main menu, switching key");  Serial.println(key); }
+  
+  switch (key) {
+    case '1': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
+    case '2': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
+    case '3': bleKeyboard.write('n');                          flash_led(1, 150, 0); break;
+    case '4': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
+    case '5': bleKeyboard.tap(KEY_UP);                 flash_led(1, 150, 0); break;
+    case '6': bleKeyboard.tap(KEY_LEFT);               flash_led(1, 150, 0); break;
+    case '7': bleKeyboard.tap(KEY_RIGHT);              flash_led(1, 150, 0); break;
+    case '8': bleKeyboard.tap(KEY_DOWN);               flash_led(1, 150, 0); break;
+  }
 }
 
 // Routine to send the keystrokes on a long press of the keypad
@@ -127,19 +117,15 @@ void send_long_press(KeypadEvent key) {
     Serial.println(key);
   }
 
-  // We're in the main menu, or offline
-  if (app_status == 2 || app_status == 3 || app_status == 0) {
-
-    switch (key) {
-      case '1': send_repeating_key('+'); break;
-      case '2': send_repeating_key('-'); break;
-      case '3': bleKeyboard.write('d'); flash_led(1, 150, 0); break;
-      case '4': if(wait_for_key_hold(long_press_time_config)) { update_barbuttons_firmware(ota_bin_stable); } break;
-      case '5': send_repeating_key(KEY_UP); break;
-      case '6': send_repeating_key(KEY_LEFT); break;
-      case '7': send_repeating_key(KEY_RIGHT); break;
-      case '8': send_repeating_key(KEY_DOWN); break;
-    }
+  switch (key) {
+    case '1': send_repeating_key('+'); break;
+    case '2': send_repeating_key('-'); break;
+    case '3': bleKeyboard.write('d'); flash_led(1, 150, 0); break;
+    case '4': if(wait_for_key_hold(long_press_time_config)) { update_barbuttons_firmware(ota_bin_stable); } break;
+    case '5': send_repeating_key(KEY_UP); break;
+    case '6': send_repeating_key(KEY_LEFT); break;
+    case '7': send_repeating_key(KEY_RIGHT); break;
+    case '8': send_repeating_key(KEY_DOWN); break;
   }
 }
 
@@ -171,25 +157,13 @@ bool wait_for_key_hold(int key_hold_time) {
 void send_repeating_key(uint8_t key) {
   digitalWrite(LED_PIN, HIGH);
   while (keypad.getState() == HOLD) {
-    bleKeyboard.write(key);
+    bleKeyboard.tap(key);
     delay(long_press_repeat_interval); // pause between presses
     keypad.getKey(); // update keypad event handler
   }
   digitalWrite(LED_PIN, LOW);
 }
 
-/*
-// Routine that sends a key repeatedly (for double char 'MediaKeyReport')
-void send_repeating_key(const MediaKeyReport key) {
-  digitalWrite(LED_PIN, HIGH);
-  while (keypad.getState() == HOLD) {
-    bleKeyboard.write(key);
-    delay(long_press_repeat_interval); // pause between presses
-    keypad.getKey(); // update keypad event handler
-  }
-  digitalWrite(LED_PIN, LOW);
-}
-*/
 
 // Quick flash of the led (assuming led is off)
 void flash_led(int times, int length, int delay_time) {
@@ -227,7 +201,7 @@ void keypad_handler(KeypadEvent key) {
     case PRESSED: // At the 'key down' event of a button
       if (DEBUG) { Serial.println("keypad.getState = PRESSED");}
       last_keypad_state = keypad.getState();
-      if (is_key_instant(key) && app_status != 1) { send_short_press(key);}
+      if (is_key_instant(key))  { send_short_press(key);}
       break;
 
     case HOLD: // When a button is held beyond the long_press_time value
@@ -244,19 +218,16 @@ void keypad_handler(KeypadEvent key) {
       }
 
       if (last_keypad_state == PRESSED) {
-        if (!(is_key_instant(key) && app_status != 1)) {
+        if (!(is_key_instant(key))) {
           send_short_press(key);
         }
       }
       
       last_keypad_state = keypad.getState();
 
-      // Turn off the status led  in normal mode 
-      if (app_status == 2 || app_status ==3) {
-        digitalWrite(LED_PIN, LOW);
-        led_state = 0;
-        led_state_time = millis(); // update last switch of the led, so it will take long to flash for status (less confusing)
-      }
+      digitalWrite(LED_PIN, LOW);
+      led_state = 0;
+      led_state_time = millis(); // update last switch of the led, so it will take long to flash for status (less confusing)
       
       // Release all keys (write() should have done this, but keys that are press()-ed should be released)
       bleKeyboard.releaseAll();
@@ -267,12 +238,9 @@ void keypad_handler(KeypadEvent key) {
       if (DEBUG) { Serial.println("keypad.getState = IDLE"); }
       last_keypad_state = keypad.getState();
 
-      // Turn off the status led  in normal mode 
-      if (app_status == 2 || app_status ==3) {
-        digitalWrite(LED_PIN, LOW);
-        led_state = 0;
-        led_state_time = millis(); // update last switch of the led, so it will take long to flash for status (less confusing)
-      }
+      digitalWrite(LED_PIN, LOW);
+      led_state = 0;
+      led_state_time = millis(); // update last switch of the led, so it will take long to flash for status (less confusing)
 
       // Release all keys (write() should have done this, but keys that are press()-ed should be released)
       bleKeyboard.releaseAll();
@@ -310,46 +278,14 @@ void loop() {
   // Need to call this function constantly to make the keypad library work
   keypad.getKey();
 
-  // influence led state based on BT connectivity
-  //
-  // if app is disconnected but the keyboard is connected, change the app_status to connected (main menu)
-  if (app_status == 0 && bleKeyboard.isPaired())  {
-    app_status = 2;
-  }
-  // if app is connected and not in config mode but the keyboard is disconnected, change the app_status to disconnected
-  if (app_status != 0 && app_status != 1 && !bleKeyboard.isPaired()) {
-    app_status = 0;
-  }
-
-  // toggle between on/off for the led, when no buttons are pressed 
-  if (keypad.getState() == IDLE) {    
-
-    // When we are flashing for the keymap status, this is a little bit different
-    if (app_status == 3) {
-      // If the current led state is expired
-      if ((millis() - led_state_time) > keymap_indicator_led_delays[led_state]) {
+  // if not paired, blink
+  if (!bleKeyboard.isPaired())  {
+      // toggle between on/off for the led, when no buttons are pressed 
+    if (keypad.getState() == IDLE) {    
+      if ((millis() - led_state_time) > led_delays[led_state]) {
         led_state = 1 - led_state; // Toggle between 0 and 1
         digitalWrite(LED_PIN, led_state); // Update the led
         led_state_time = millis(); // update last switch
-
-        if (led_state == 0) { // we just completed a keymap flash
-          keymap_indicator_countdown--; 
-          if (keymap_indicator_countdown == 0) {
-            app_status = 2;           
-          }
-        }
-      }  
-    } else { 
-      if ((millis() - led_state_time) > led_delays[app_status][led_state]) {
-        led_state = 1 - led_state; // Toggle between 0 and 1
-        digitalWrite(LED_PIN, led_state); // Update the led
-        led_state_time = millis(); // update last switch
-
-        // switch to app_status 3 (keymap flash) if led goes on in app_status 2
-        if (app_status == 2 && led_state == 1) { 
-          app_status = 3; 
-          keymap_indicator_countdown = 1; 
-        }
       }
     }
   }
