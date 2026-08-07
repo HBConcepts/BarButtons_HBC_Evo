@@ -63,7 +63,7 @@ HijelHID_BLEKeyboard bleKeyboard("BarButtonsHBC", "HBConcepts", 100);
 #include <Update.h>
 const char* SSID = "barbuttons";
 const char* PSWD = "barbuttons";
-String host = "updates.hbconcepts.net";
+String host = "barbuttons.jaxeadv.com";
 int port = 80;
 String ota_bin_stable =  "/barbuttons-files/barbuttons-stable.bin";  // bin file name with a slash in front.
 String ota_bin_preview = "/barbuttons-files/barbuttons-preview.bin"; // bin file name with a slash in front.
