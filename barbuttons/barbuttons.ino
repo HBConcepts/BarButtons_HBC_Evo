@@ -21,13 +21,13 @@
 
 // Debugging flag. Mostly controls if serial output is enabled.
 // On the C3, the serial output blocks the device unless the serial monitor is attached (!)
-const int DEBUG = 0;
+const int DEBUG = 1;
 
 // Firmware version
 const int firmware_version = 1;
 
 #include <Keypad.h>      // Keypad library to handle matrix keypad setup
-#include <BleKeyboard.h> // For ESP32 Bluetooth keyboard HID https://github.com/T-vK/ESP32-BLE-Keyboard
+#include <HijelHID_BLEKeyboard.h>
 
 // Keypad library settings
 const byte ROWS = 3;
@@ -45,7 +45,7 @@ byte colPins[ROWS] = {3, 4, 5};  // keypad pins, left to right
 
 
 // Initial set-up the bleKeyboard instance
-BleKeyboard bleKeyboard("BarButtonsHBC", "HBConcepts", 100);
+HijelHID_BLEKeyboard bleKeyboard("BarButtonsHBC", "HBConcepts", 100);
 
 
 // For OTA updates
@@ -110,16 +110,11 @@ void send_short_press(KeypadEvent key) {
       case '1': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
       case '2': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
       case '3': bleKeyboard.write('n');                          flash_led(1, 150, 0); break;
-      case '4': 
-        // Center button
-        bleKeyboard.write('c');  // Osmand and many others
-        //bleKeyboard.press(KEY_LEFT_GUI); bleKeyboard.press('L'); bleKeyboard.releaseAll();  // Gurumaps on iOS
-        bleKeyboard.press(KEY_LEFT_CTRL); bleKeyboard.press('L'); bleKeyboard.releaseAll();  // Gurumaps on Android
-        flash_led(1, 150, 0); break;
-      case '5': bleKeyboard.write(KEY_UP_ARROW);                 flash_led(1, 150, 0); break;
-      case '6': bleKeyboard.write(KEY_LEFT_ARROW);               flash_led(1, 150, 0); break;
-      case '7': bleKeyboard.write(KEY_RIGHT_ARROW);              flash_led(1, 150, 0); break;
-      case '8': bleKeyboard.write(KEY_DOWN_ARROW);               flash_led(1, 150, 0); break;
+      case '4': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
+      case '5': bleKeyboard.write(KEY_UP);                 flash_led(1, 150, 0); break;
+      case '6': bleKeyboard.write(KEY_LEFT);               flash_led(1, 150, 0); break;
+      case '7': bleKeyboard.write(KEY_RIGHT);              flash_led(1, 150, 0); break;
+      case '8': bleKeyboard.write(KEY_DOWN);               flash_led(1, 150, 0); break;
     }
   }      
 }
@@ -140,10 +135,10 @@ void send_long_press(KeypadEvent key) {
       case '2': send_repeating_key('-'); break;
       case '3': bleKeyboard.write('d'); flash_led(1, 150, 0); break;
       case '4': if(wait_for_key_hold(long_press_time_config)) { update_barbuttons_firmware(ota_bin_stable); } break;
-      case '5': send_repeating_key(KEY_UP_ARROW); break;
-      case '6': send_repeating_key(KEY_LEFT_ARROW); break;
-      case '7': send_repeating_key(KEY_RIGHT_ARROW); break;
-      case '8': send_repeating_key(KEY_DOWN_ARROW); break;
+      case '5': send_repeating_key(KEY_UP); break;
+      case '6': send_repeating_key(KEY_LEFT); break;
+      case '7': send_repeating_key(KEY_RIGHT); break;
+      case '8': send_repeating_key(KEY_DOWN); break;
     }
   }
 }
@@ -183,6 +178,7 @@ void send_repeating_key(uint8_t key) {
   digitalWrite(LED_PIN, LOW);
 }
 
+/*
 // Routine that sends a key repeatedly (for double char 'MediaKeyReport')
 void send_repeating_key(const MediaKeyReport key) {
   digitalWrite(LED_PIN, HIGH);
@@ -193,6 +189,7 @@ void send_repeating_key(const MediaKeyReport key) {
   }
   digitalWrite(LED_PIN, LOW);
 }
+*/
 
 // Quick flash of the led (assuming led is off)
 void flash_led(int times, int length, int delay_time) {
@@ -316,11 +313,11 @@ void loop() {
   // influence led state based on BT connectivity
   //
   // if app is disconnected but the keyboard is connected, change the app_status to connected (main menu)
-  if (app_status == 0 && bleKeyboard.isConnected())  {
+  if (app_status == 0 && bleKeyboard.isPaired())  {
     app_status = 2;
   }
   // if app is connected and not in config mode but the keyboard is disconnected, change the app_status to disconnected
-  if (app_status != 0 && app_status != 1 && !bleKeyboard.isConnected()) {
+  if (app_status != 0 && app_status != 1 && !bleKeyboard.isPaired()) {
     app_status = 0;
   }
 
