@@ -35,7 +35,7 @@ const byte COLS = 3;
 char keys[ROWS][COLS] = {
   {'+', 'U', 'C'},
   {'-', 'L', 'R'},
-  {'3', 'D', '9'}
+  {'A', 'D', '9'}
 };
 
 // Pin assignment, is fixed because of instructions and PCB
@@ -100,7 +100,7 @@ void send_short_press(KeypadEvent key) {
   switch (key) {
     case '+': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
     case '-': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
-    case '3': bleKeyboard.write('a');                          flash_led(1, 150, 0); break;
+    case 'A': bleKeyboard.write('a');                          flash_led(1, 150, 0); break;
     //case 'C': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
     case 'U': bleKeyboard.tap(KEY_UP);                 flash_led(1, 150, 0); break;
     case 'L': bleKeyboard.tap(KEY_LEFT);               flash_led(1, 150, 0); break;
@@ -120,7 +120,7 @@ void send_long_press(KeypadEvent key) {
   switch (key) {
     case '+': send_repeating_key('+'); break;
     case '-': send_repeating_key('-'); break;
-    case '3': bleKeyboard.write('b'); flash_led(1, 150, 0); break;
+    case 'A': bleKeyboard.write('b'); flash_led(1, 150, 0); break;
     case 'C': bleKeyboard.write('c'); flash_led(1, 150, 0); break;
     case 'U': send_repeating_key(KEY_UP); break;
     case 'L': send_repeating_key(KEY_LEFT); break;
@@ -267,11 +267,14 @@ void setup() {
   // Enable the led to indicate we're switched on
   pinMode(LED_PIN, OUTPUT);
 
+  digitalWrite(LED_PIN, 0); // LED off
+
   // End of setup()
   if (DEBUG) {
     Serial.println("Good to go!");
     Serial.println("Firmware version: " + String(firmware_version));
   }
+  
 }
 
 void loop() {
@@ -280,7 +283,7 @@ void loop() {
   keypad.getKey();
 
   // if not paired, blink
-  if (!bleKeyboard.isPaired())  {
+  if (!bleKeyboard.isPaired() || led_state == 1) {
       // toggle between on/off for the led, when no buttons are pressed 
     if (keypad.getState() == IDLE) {    
       if ((millis() - led_state_time) > led_delays[led_state]) {

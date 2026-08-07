@@ -8,7 +8,7 @@ This work is also licensed under the Creative Commons Attribution-NonCommercial 
 
 You can find 3D printable models for an updated layout at https://cults3d.com/en/users/HBConcepts/3d-models
 
-# Key Map:
+# Key Map
 - Joystick: Pan Map
 - Joystick Center (LongPress): Center Map
 - Zoom Buttons: Zoom
@@ -16,3 +16,9 @@ You can find 3D printable models for an updated layout at https://cults3d.com/en
     - Short Press: Menu
     - Long Press: Switch Map Orientation (3D / 2D / NorthUp)
 
+# Connection
+IO PIN  2   3   4   5   6
+    1   U   D   L   R   C
+    0   +   -   A
+
+LED: IO PIN 7
