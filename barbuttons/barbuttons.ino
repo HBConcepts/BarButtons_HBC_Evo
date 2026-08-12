@@ -2,7 +2,7 @@
   BarButtons_HBC_Evo
 
   This is an evolution of the JaxeADV orignal barbuttons to replace the buttons used for 
-  directions by a 5-way digital thumb stick.
+  directions by a 5-way digital thumb stick. The center click of the thumb stick is unused (too hard to use while riding).
 
   This arduino code maps physical buttons from a keypad to bluetooth keyboard commands
   Intended to make using your phone for navigation on a motorcycle easier
@@ -23,7 +23,7 @@
 const int DEBUG = 1;
 
 // Firmware version
-const int firmware_version = 2;
+const int firmware_version = 3;
 
 #include <Keypad.h>      // Keypad library to handle matrix keypad setup
 #include <HijelHID_BLEKeyboard.h>
@@ -43,7 +43,7 @@ char keys[ROWS][COLS] = {
 const byte ROWS = 2;
 const byte COLS = 5;
 char keys[ROWS][COLS] = {  
-  {'+', '-', 'A', '9', '9'},
+  {'+', '-', 'A', 'B', '9'},
   {'U', 'D', 'L', 'R', 'C'}
 };
 
@@ -111,6 +111,7 @@ void send_short_press(KeypadEvent key) {
     case '+': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
     case '-': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
     case 'A': bleKeyboard.write('a');                          flash_led(1, 150, 0); break;
+    case 'B': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
     //case 'C': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
     case 'U': bleKeyboard.tap(KEY_UP);                 flash_led(1, 150, 0); break;
     case 'L': bleKeyboard.tap(KEY_LEFT);               flash_led(1, 150, 0); break;
@@ -131,7 +132,8 @@ void send_long_press(KeypadEvent key) {
     case '+': send_repeating_key('+'); break;
     case '-': send_repeating_key('-'); break;
     case 'A': bleKeyboard.write('b'); flash_led(1, 150, 0); break;
-    case 'C': bleKeyboard.write('c'); flash_led(1, 150, 0); break;
+    //case 'C': bleKeyboard.write('c'); flash_led(1, 150, 0); break;
+    case 'B': bleKeyboard.tap(KEY_RETURN); flash_led(1, 150, 0); break;
     case 'U': send_repeating_key(KEY_UP); break;
     case 'L': send_repeating_key(KEY_LEFT); break;
     case 'R': send_repeating_key(KEY_RIGHT); break;
