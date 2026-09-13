@@ -7,10 +7,16 @@
   This arduino code maps physical buttons from a keypad to bluetooth keyboard commands
   Intended to make using your phone for navigation on a motorcycle easier
 
-  The current key mapping is made to work with the Kurviger app.
+  The default key mapping is made to work with the Kurviger app.
+  There is also an optional Keymap Switch that can be installed to switch from the default (Kurviger) keymap to an alternate keymap.
   
-  More info at https://jaxeadv.com/barbuttons
-  Build instructions at https://jaxeadv.com/barbuttons/build
+  You can find the 3D printable models for an updated layout at https://cults3d.com/en/users/HBConcepts/3d-models
+
+  You can flash this code to a LOLIN C3 Mini using the Arduino IDE available at https://www.arduino.cc/en/software/
+
+  The libraies needed are the Keypad library and the HijelHID_BLEKeyboard library, both available from the library manager in the Arduino IDE.
+
+  Original Build instructions at https://jaxeadv.com/barbuttons/build
 
   Ensure to set DEBUG to 0 in the code below, unless you're connecting the ESP32C3 to the serial monitor
 
@@ -30,17 +36,6 @@ const int firmware_version = 3;
 #include <Keypad.h>      // Keypad library to handle matrix keypad setup
 #include <HijelHID_BLEKeyboard.h>
 
-/*
-// Keypad library settings
-const byte ROWS = 3;
-const byte COLS = 3;
-char keys[ROWS][COLS] = {
-  {'+', 'U', 'C'},
-  {'-', 'L', 'R'},
-  {'A', 'D', '9'}
-};
-*/
-
 // Keypad library settings
 const byte ROWS = 2;
 const byte COLS = 5;
@@ -49,26 +44,16 @@ char keys[ROWS][COLS] = {
   {'U', 'D', 'L', 'R', 'C'}
 };
 
-
 // Pin assignment, is fixed because of instructions and PCB
 const int LED_PIN = 7;    //   status led 
 byte rowPins[ROWS] = {0, 1};  // keypad pins, top to bottom
 byte colPins[COLS] = {2, 3, 4, 5, 6};  // keypad pins, left to right
-
+const int SW_ALTKEYMAP = 8; // Alt Keymap Switch pin
+const int KEYMAP_DEFAULT = 1;
+const int KEYMAP_ALTERNATE = 2;
 
 // Initial set-up the bleKeyboard instance
 HijelHID_BLEKeyboard bleKeyboard("BarButtonsHBC", "HBConcepts", 100);
-
-
-// For OTA updates
-#include <WiFi.h>
-#include <Update.h>
-const char* SSID = "barbuttons";
-const char* PSWD = "barbuttons";
-String host = "barbuttons.jaxeadv.com";
-int port = 80;
-String ota_bin_stable =  "/barbuttons-files/barbuttons-stable.bin";  // bin file name with a slash in front.
-String ota_bin_preview = "/barbuttons-files/barbuttons-preview.bin"; // bin file name with a slash in front.
 
 // Initialization
 /////////////////
@@ -99,6 +84,14 @@ int led_state_time = 0;  // holds the time we've switched to the current led_sta
 // First dimension is keymap, second is key
 char instant_keys[10] = {'+', '-', 'U', 'L', 'R', 'D'};
 
+byte readKeymapSwitch() {  
+  if (digitalRead(SW_ALTKEYMAP) == LOW) {
+    return KEYMAP_ALTERNATE; // Alternate keymap
+  } else {
+    return KEYMAP_DEFAULT; // Default keymap
+  }
+};
+
 // Routine to send the keystrokes on a short press of the keypad
 void send_short_press(KeypadEvent key) {
 
@@ -109,17 +102,31 @@ void send_short_press(KeypadEvent key) {
 
   if (DEBUG) { Serial.println("We're in the main menu, switching key");  Serial.println(key); }
   
-  switch (key) {
-    case '+': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
-    case '-': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
-    case 'A': bleKeyboard.write('a');                          flash_led(1, 150, 0); break;
-    case 'B': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
-    //case 'C': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
-    case 'U': bleKeyboard.tap(KEY_UP);                 flash_led(1, 150, 0); break;
-    case 'L': bleKeyboard.tap(KEY_LEFT);               flash_led(1, 150, 0); break;
-    case 'R': bleKeyboard.tap(KEY_RIGHT);              flash_led(1, 150, 0); break;
-    case 'D': bleKeyboard.tap(KEY_DOWN);               flash_led(1, 150, 0); break;
-  }
+  if (readKeymapSwitch() == KEYMAP_DEFAULT) {
+    // Kurviger Keymap
+    switch (key) {
+      case '+': bleKeyboard.write('+');                          flash_led(1, 150, 0); break;
+      case '-': bleKeyboard.write('-');                          flash_led(1, 150, 0); break;
+      case 'A': bleKeyboard.write('a');                          flash_led(1, 150, 0); break;
+      case 'B': bleKeyboard.write('c');                          flash_led(1, 150, 0); break;
+      case 'U': bleKeyboard.tap(KEY_UP);                 flash_led(1, 150, 0); break;
+      case 'L': bleKeyboard.tap(KEY_LEFT);               flash_led(1, 150, 0); break;
+      case 'R': bleKeyboard.tap(KEY_RIGHT);              flash_led(1, 150, 0); break;
+      case 'D': bleKeyboard.tap(KEY_DOWN);               flash_led(1, 150, 0); break;
+    }
+  } else  {
+    // Alternate Keymap
+    switch (key) {
+      case '+': bleKeyboard.tap(KEY_F3);                         flash_led(1, 150, 0); break;
+      case '-': bleKeyboard.tap(KEY_F4);                          flash_led(1, 150, 0); break;
+      case 'A': bleKeyboard.tap(KEY_F5);                          flash_led(1, 150, 0); break;
+      case 'B': bleKeyboard.tap(KEY_F6);                          flash_led(1, 150, 0); break;
+      case 'U': bleKeyboard.tap(KEY_F7);                 flash_led(1, 150, 0); break;
+      case 'L': bleKeyboard.tap(KEY_F8);               flash_led(1, 150, 0); break;
+      case 'R': bleKeyboard.tap(KEY_F9);              flash_led(1, 150, 0); break;
+      case 'D': bleKeyboard.tap(KEY_F10);               flash_led(1, 150, 0); break;
+    }
+  }  
 }
 
 // Routine to send the keystrokes on a long press of the keypad
@@ -130,19 +137,32 @@ void send_long_press(KeypadEvent key) {
     Serial.println(key);
   }
 
-  switch (key) {
-    case '+': send_repeating_key('+'); break;
-    case '-': send_repeating_key('-'); break;
-    case 'A': bleKeyboard.write('b'); flash_led(1, 150, 0); break;
-    //case 'C': bleKeyboard.write('c'); flash_led(1, 150, 0); break;
-    case 'B': bleKeyboard.tap(KEY_F1); flash_led(1, 150, 0); break;
-    case 'U': send_repeating_key(KEY_UP); break;
-    case 'L': send_repeating_key(KEY_LEFT); break;
-    case 'R': send_repeating_key(KEY_RIGHT); break;
-    case 'D': send_repeating_key(KEY_DOWN); break;
+  if (readKeymapSwitch() == KEYMAP_DEFAULT) {
+    // Kurviger Keymap
+    switch (key) {
+      case '+': send_repeating_key('+'); break;
+      case '-': send_repeating_key('-'); break;
+      case 'A': bleKeyboard.write('b'); flash_led(1, 150, 0); break;
+      case 'B': bleKeyboard.tap(KEY_F1); flash_led(1, 150, 0); break;
+      case 'U': send_repeating_key(KEY_UP); break;
+      case 'L': send_repeating_key(KEY_LEFT); break;
+      case 'R': send_repeating_key(KEY_RIGHT); break;
+      case 'D': send_repeating_key(KEY_DOWN); break;
+    }
+  } else {
+    // Alternate Keymap
+   switch (key) {
+      case '+': send_repeating_key(KEY_F3); break;
+      case '-': send_repeating_key(KEY_F4); break;
+      case 'A': bleKeyboard.tap(KEY_F11); flash_led(1, 150, 0); break;
+      case 'B': bleKeyboard.tap(KEY_F12); flash_led(1, 150, 0); break;
+      case 'U': send_repeating_key(KEY_F7); break;
+      case 'L': send_repeating_key(KEY_F8); break;
+      case 'R': send_repeating_key(KEY_F9); break;
+      case 'D': send_repeating_key(KEY_F10); break;
+    }
   }
 }
-
 
 
 // Routine that waits while a key is held, returns true if the key is held
@@ -282,6 +302,8 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
 
   digitalWrite(LED_PIN, 0); // LED off
+
+  pinMode(SW_ALTKEYMAP, INPUT_PULLUP); // Alternate Keymap switch
 
   // End of setup()
   if (DEBUG) {
