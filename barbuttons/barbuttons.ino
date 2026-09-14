@@ -31,7 +31,7 @@
 const int DEBUG = 1;
 
 // Firmware version
-const int firmware_version = 3;
+const int firmware_version = 4;
 
 #include <Keypad.h>      // Keypad library to handle matrix keypad setup
 #include <HijelHID_BLEKeyboard.h>
@@ -98,6 +98,8 @@ void send_short_press(KeypadEvent key) {
   if (DEBUG) {
     Serial.print("Sending short press key ");
     Serial.println(key);
+    Serial.print("Keymap switch state: ");
+    Serial.println(readKeymapSwitch());
   }
 
   if (DEBUG) { Serial.println("We're in the main menu, switching key");  Serial.println(key); }
@@ -135,6 +137,8 @@ void send_long_press(KeypadEvent key) {
   if (DEBUG) {
     Serial.print("Sending long press key for button ");
     Serial.println(key);
+    Serial.print("Keymap switch state: ");
+    Serial.println(readKeymapSwitch());
   }
 
   if (readKeymapSwitch() == KEYMAP_DEFAULT) {
